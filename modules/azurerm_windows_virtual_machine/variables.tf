@@ -23,3 +23,15 @@ variable enableAutoShutdown{
     description = "Valida se ativa AutoShutdown"
     default = true
 }
+
+variable admin_name{
+    type = string
+    default = "admt"
+    description = "Nome de usuario local do Windows"
+}
+
+variable admin_pass{
+    type = string
+    default = "6chh+*O9mP)l7"
+    description = "Senha do usuario local"
+}
