@@ -10,7 +10,7 @@ provider "azurerm" {
     }
     subscription_id = "3d880f72-1f4a-40d5-a0b1-1e9e121d3aca"
 }
-#Install-ADDSForest -DomainName "matheus.local" -InstallDNS -DomainMode 6 -SafeModeAdministratorPassword "6chh+*O9mP)l7" -Confirm yes
+
 locals {
   customData = <<CUSTOMDATA
     powershell Install-ADDSForest -DomainName YOURDOMAINHERE -InstallDNS
