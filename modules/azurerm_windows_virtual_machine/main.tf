@@ -25,6 +25,7 @@ resource "azurerm_windows_virtual_machine" "windows_vm" {
   size                = "Standard_B2ms"
   admin_username      = var.admin_name
   admin_password      = var.admin_pass
+  custom_data         = base64encode(var.customData)
   network_interface_ids = [
     azurerm_network_interface.net_interface.id,
   ]

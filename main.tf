@@ -10,14 +10,14 @@ provider "azurerm" {
     }
     subscription_id = "3d880f72-1f4a-40d5-a0b1-1e9e121d3aca"
 }
-#az login --use-device-code --tenant "269190a9-559e-4525-9172-1caaaef5ec44"
-/*Comando Para Logar na Conta de Teste.
-$SecurePassword = convertto-securestring -AsPlainText -Force -String ('pc98Q~YuVgaVOsh-T.MrKIbjv~dlU0gZAQypZbh2')
-$TenantId = '269190a9-559e-4525-9172-1caaaef5ec44'
-$ApplicationId = '6b652547-8445-43a3-b22c-dd577ab187e2'
-$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $ApplicationId, $SecurePassword
-Connect-AzAccount -ServicePrincipal -TenantId $TenantId -Credential $Credential
-*/
+#Install-ADDSForest -DomainName "matheus.local" -InstallDNS -DomainMode 6 -SafeModeAdministratorPassword "6chh+*O9mP)l7" -Confirm yes
+locals {
+  customData = <<CUSTOMDATA
+    powershell Install-ADDSForest -DomainName YOURDOMAINHERE -InstallDNS
+    
+  CUSTOMDATA
+}
+
 module "resource_group"{
     source = "./modules/azurerm_resource_group"
     rg_name = "RG-Terraform-DEV"
@@ -40,7 +40,9 @@ module "windows_vm"{
     rg_location = module.resource_group.resource_group_location
     vm_prefix = "VM-DC${count.index}"
     vnet_snet-id = module.virtual_network.snet_id
-    #admin_password      = 6chh+*O9mP)l7
+    admin_name = "admt"
+    admin_pass= "6chh+*O9mP)l7"
+    customData = local.customData
 }
 
 data "external" "myPublicIP"{
