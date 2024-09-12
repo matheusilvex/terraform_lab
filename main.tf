@@ -8,14 +8,7 @@ provider "azurerm" {
             prevent_deletion_if_contains_resources = false
         }
     }
-    subscription_id = "3d880f72-1f4a-40d5-a0b1-1e9e121d3aca"
-}
-
-locals {
-  customData = <<CUSTOMDATA
-    powershell Install-ADDSForest -DomainName YOURDOMAINHERE -InstallDNS
-    
-  CUSTOMDATA
+    subscription_id = ""
 }
 
 module "resource_group"{
@@ -42,11 +35,7 @@ module "windows_vm"{
     vnet_snet-id = module.virtual_network.snet_id
     admin_name = "admt"
     admin_pass= "6chh+*O9mP)l7"
-    customData = local.customData
-}
-
-data "external" "myPublicIP"{
-    program = ["pwsh", "-Command", "curl 'http://myexternalip.com/json'"]
+    
 }
 
 module "nsg"{
@@ -57,3 +46,33 @@ module "nsg"{
     snet_id = module.virtual_network.snet_id
     publicIPsource = data.external.myPublicIP.result["ip"]
 }
+
+data "external" "myPublicIP"{
+    program = ["pwsh", "-Command", "curl 'http://myexternalip.com/json'"]
+}
+
+#Install Active Directory on the DC0 VM
+resource "azurerm_virtual_machine_extension" "install_ad" {
+    name                 = "install_ad-ds"
+# resource_group_name  = azurerm_resource_group.main.name
+    virtual_machine_id   = module.windows_vm[0].vmID
+    publisher            = "Microsoft.Compute"
+    type                 = "CustomScriptExtension"
+    type_handler_version = "1.9"
+
+    protected_settings = <<SETTINGS
+    {    
+        "commandToExecute": "powershell -command \"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${base64encode(data.template_file.ADDS.rendered)}')) | Out-File -filepath createAD.ps1\" && powershell -ExecutionPolicy Unrestricted -File createAD.ps1 -Domain_DNSName ${data.template_file.ADDS.vars.Domain_DNSName} -SafeModeAdministratorPassword ${data.template_file.ADDS.vars.SafeModeAdministratorPassword}"
+    }
+    SETTINGS
+}
+
+#Variable input for the ADDS.ps1 script
+data "template_file" "ADDS" {
+    template = "${file("createAD.ps1")}"
+    vars = {
+        Domain_DNSName          = "${var.Domain_DNSName}"
+        SafeModeAdministratorPassword = "${var.SafeModeAdministratorPassword}"
+  }
+}
+

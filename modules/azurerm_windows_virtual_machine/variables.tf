@@ -35,8 +35,3 @@ variable admin_pass{
     default = "6chh+*O9mP)l7"
     description = "Senha do usuario local"
 }
-
-variable customData{
-    type = string
-    description = "Acoes realizadas pos deploy"
-}
