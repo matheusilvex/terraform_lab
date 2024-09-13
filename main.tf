@@ -8,7 +8,7 @@ provider "azurerm" {
             prevent_deletion_if_contains_resources = false
         }
     }
-    subscription_id = ""
+    subscription_id = "3d880f72-1f4a-40d5-a0b1-1e9e121d3aca"
 }
 
 module "resource_group"{
@@ -22,13 +22,13 @@ module "virtual_network"{
     rg_name = module.resource_group.resource_group_name
     vnet_name = "HUB-PRD"
     snet_name = "HUB-PRD"
-    #dnsServer = module.windows_vm[1].private_ip
+    dnsServer = "10.0.1.4"
 }
 
 module "windows_vm"{
     depends_on = [module.virtual_network]
     source = "./modules/azurerm_windows_virtual_machine"
-    count = 1 #Numero de VM que vai criar
+    count = 2 #Numero de VM que vai criar
     rg_name = module.resource_group.resource_group_name
     rg_location = module.resource_group.resource_group_location
     vm_prefix = "VM-DC${count.index}"
